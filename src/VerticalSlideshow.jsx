@@ -389,20 +389,15 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
           creativeworkflowlab.com
         </motion.div>
 
-        <div className="flex-1 mt-24 mb-[100px] flex items-start justify-center px-8 overflow-visible">
+        <div className="flex-1 mt-24 mb-[100px] flex items-start justify-center px-8">
           <motion.div
             drag
             dragConstraints={containerRef}
             dragElastic={0.3}
             dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
-            style={{ 
-              x: springX,
-              y: springY,
-              position: 'relative',  // Added for better positioning
-              zIndex: 10            // Ensure text stays above background
-            }}
+            style={{ x: springX, y: springY }}
             whileTap={{ cursor: 'grabbing' }}
-            className="cursor-grab p-24 overflow-visible" // Increased padding and added overflow-visible
+            className="cursor-grab"
           >
             <AnimatePresence mode="wait">
               <motion.div
