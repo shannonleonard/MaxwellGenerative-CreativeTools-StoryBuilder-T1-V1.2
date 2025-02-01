@@ -266,12 +266,13 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
     setDroppedGifs([]);
   };
 
-  // Add this effect right after the glowColors array
-  useEffect(() => {
-    const lastTimeRef = useRef(null);
-    const rafId = useRef(null);
-    const keysPressed = useRef({ w: false, a: false, s: false, d: false });
+  // Move these refs outside the useEffect, near other state declarations
+  const lastTimeRef = useRef(null);
+  const rafId = useRef(null);
+  const keysPressed = useRef({ w: false, a: false, s: false, d: false });
 
+  // Then update the useEffect
+  useEffect(() => {
     const handleKeyDown = (e) => {
       const key = e.key.toLowerCase();
       if (["w", "a", "s", "d"].includes(key)) keysPressed.current[key] = true;
