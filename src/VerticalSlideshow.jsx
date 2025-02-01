@@ -291,6 +291,14 @@ const VerticalSlideshow = () => {
     setDroppedGifs([]);
   };
 
+  // Add these lines for spring motion
+  const springX = useMotionValue(0);
+  const springY = useMotionValue(0);
+  
+  // Or if you want smoother motion, use springs:
+  const x = useSpring(springX, { stiffness: 300, damping: 30 });
+  const y = useSpring(springY, { stiffness: 300, damping: 30 });
+
   return (
     <div className="w-full flex flex-col items-center relative overflow-hidden">
       {/* Control Dock */}
@@ -372,7 +380,7 @@ const VerticalSlideshow = () => {
             dragConstraints={containerRef}
             dragElastic={0.3}
             dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
-            style={{ x: springX, y: springY }}
+            style={{ x, y }}
             whileTap={{ cursor: 'grabbing' }}
             className="cursor-grab"
           >
