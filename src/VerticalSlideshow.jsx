@@ -192,26 +192,29 @@ const VerticalSlideshow = () => {
     });
   }, [currentSlide, textControls]);
   
-  // Listen for key press "e" to trigger the intense glow effect.
+  // Trigger the intense glow effect when you press "e"
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = async (e) => {
       if (e.key.toLowerCase() === "e") {
-        // Immediately trigger a more intense glow and scale up
-        textControls.start({
-          scale: 1.1,
-          filter: "drop-shadow(0 0 45px rgba(255,255,255,1))",
-          transition: { duration: 0 }
-        }).then(() => {
-          // Then fade back to the base state smoothly over 5 seconds.
-          return textControls.start({
+        try {
+          // Immediately trigger a more intense glow and slight scale up
+          await textControls.start({
+            scale: 1.1,
+            filter: "drop-shadow(0 0 45px rgba(255,255,255,1))",
+            transition: { duration: 0 }
+          });
+          // Then fade back to the base state smoothly over 5 seconds
+          await textControls.start({
             scale: 1,
             filter: "drop-shadow(0 0 25px rgba(255,255,255,0.5))",
             transition: { duration: 5, ease: "easeInOut" }
           });
-        });
+        } catch (error) {
+          console.error("Error in keydown animation:", error);
+        }
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [textControls]);
