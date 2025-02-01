@@ -191,26 +191,30 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
     });
   }, [currentSlide, textControls]);
   
-  // Add this near the top with other constants
+  // Update the glowColors array with more intense colors
   const glowColors = [
-    "rgba(255,0,255,0.8)", // Pink
-    "rgba(0,255,255,0.8)", // Cyan
-    "rgba(255,255,0,0.8)", // Yellow
-    "rgba(0,255,0,0.8)",   // Green
-    "rgba(255,128,0,0.8)"  // Orange
+    "rgba(255,0,255,1)", // Bright Pink
+    "rgba(0,255,255,1)", // Bright Cyan
+    "rgba(255,255,0,1)", // Bright Yellow
+    "rgba(0,255,0,1)",   // Bright Green
+    "rgba(255,128,0,1)"  // Bright Orange
   ];
 
-  // In the VerticalSlideshow component, update the keydown effect:
+  // Update the glow effect in the useEffect
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key.toLowerCase() === "e") {
-        // Create a sequence of color transitions
+        // Create a sequence of color transitions with more intense glow
         const glowSequence = glowColors.map((color, index) => ({
-          scale: 1.1,
-          filter: `drop-shadow(0 0 45px ${color}) drop-shadow(0 0 85px ${color})`,
+          scale: 1.2,
+          filter: `
+            drop-shadow(0 0 50px ${color}) 
+            drop-shadow(0 0 100px ${color}) 
+            drop-shadow(0 0 150px ${color})
+          `,
           transition: { 
-            duration: 0.5,
-            delay: index * 0.2,
+            duration: 0.3,
+            delay: index * 0.15,
             ease: "easeInOut"
           }
         }));
@@ -220,11 +224,11 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
           for (const glowState of glowSequence) {
             await textControls.start(glowState);
           }
-          // Return to default state
+          // Return to default state with a subtle glow
           await textControls.start({
             scale: 1,
-            filter: "drop-shadow(0 0 25px rgba(255,255,255,0.5))",
-            transition: { duration: 2, ease: "easeInOut" }
+            filter: "drop-shadow(0 0 35px rgba(255,255,255,0.7))",
+            transition: { duration: 1.5, ease: "easeInOut" }
           });
         }
 

@@ -13,10 +13,12 @@ function App() {
       switch(e.key.toLowerCase()) {
         case 'arrowright':
         case 'd':
+        case 'w':
           handleNext();
           break;
         case 'arrowleft':
         case 'a':
+        case 's':
           handlePrevious();
           break;
         default:
