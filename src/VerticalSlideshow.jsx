@@ -191,9 +191,13 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
     });
   }, [currentSlide, textControls]);
   
-  // Near the top with other state declarations, update the movement settings
-  const movementSpeed = 0.5; // Controls WASD movement speed
-  const springConfig = { stiffness: 100, damping: 30 }; // More gentle spring for smoother movement
+  // First, update the movement settings for smoother motion
+  const movementSpeed = 0.2; // Reduced for smoother movement
+  const springConfig = { 
+    stiffness: 50,  // Reduced for more smoothness
+    damping: 15,    // Adjusted for better spring effect
+    mass: 1.5       // Added mass for more natural movement
+  };
 
   // Update the text movement logic
   const baseX = useMotionValue(0);
@@ -383,24 +387,25 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
           creativeworkflowlab.com
         </motion.div>
 
-        <div className="flex-1 mt-24 mb-[100px] flex items-start justify-center px-8">
+        <div className="flex-1 mt-24 mb-[100px] flex items-start justify-center px-8 overflow-visible">
           <motion.div
             drag
             dragConstraints={containerRef}
             dragElastic={0.3}
             dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
-            style={{ x: springX, y: springY }}
+            style={{ 
+              x: springX,
+              y: springY,
+              position: 'relative',  // Added for better positioning
+              zIndex: 10            // Ensure text stays above background
+            }}
             whileTap={{ cursor: 'grabbing' }}
-            className="cursor-grab relative p-20" // Added padding to prevent glow cropping
+            className="cursor-grab p-24 overflow-visible" // Increased padding and added overflow-visible
           >
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentSlide}
-                initial={{ 
-                  opacity: 0, 
-                  y: 130, 
-                  scale: 0.95 
-                }}
+                initial={{ opacity: 0, y: 130, scale: 0.95 }}
                 animate={{
                   opacity: 1,
                   y: 0,
@@ -411,22 +416,14 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
                     "drop-shadow(0 0 50px rgba(255,255,255,0))"
                   ]
                 }}
-                exit={{ 
-                  opacity: 0, 
-                  y: -30, 
-                  scale: 0.95 
-                }}
+                exit={{ opacity: 0, y: -30, scale: 0.95 }}
                 transition={{
                   opacity: { duration: 0.3, ease: "easeInOut" },
                   y: { duration: 0.3, ease: "easeInOut" },
                   scale: { duration: 0.3, ease: "easeInOut" },
                   filter: { duration: 1, times: [0, 0.5, 1], ease: "easeInOut" }
                 }}
-                className="text-white font-bold text-4xl leading-relaxed text-left max-w-xl"
-                whileHover={{ 
-                  filter: 'drop-shadow(0 0 50px rgba(255,255,255,0.9))', 
-                  scale: 1.05 
-                }}
+                className="text-white font-bold text-4xl leading-relaxed text-left max-w-xl overflow-visible" // Added overflow-visible
               >
                 {slidesData[currentSlide]}
               </motion.div>
