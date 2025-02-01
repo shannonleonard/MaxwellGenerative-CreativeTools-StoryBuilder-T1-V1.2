@@ -255,6 +255,29 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
     return () => window.removeEventListener('keydown', handleResetKey);
   }, [resetTextPosition]);
 
+  // Add this effect for the 'E' key glow
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key.toLowerCase() === 'e') {
+        textControls.start({
+          filter: [
+            "drop-shadow(0 0 25px rgba(255,255,255,1))",
+            "drop-shadow(0 0 50px rgba(255,255,255,1))",
+            "drop-shadow(0 0 25px rgba(255,255,255,1))"
+          ],
+          transition: {
+            duration: 1,
+            ease: "easeInOut",
+            times: [0, 0.5, 1]
+          }
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [textControls]);
+
   // Slide navigation.
   const handleNext = () => setCurrentSlide((prev) => (prev + 1) % totalSlides);
   const handlePrevious = () => setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
@@ -420,7 +443,7 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
                   scale: { duration: 0.2, ease: "backInOut" },
                   filter: { duration: 0.6, times: [0, 0.3, 1], ease: "easeInOut" }
                 }}
-                className="text-white font-bold text-4xl leading-relaxed text-left max-w-xl p-8"
+                className="text-white font-bold text-4xl leading-relaxed text-left max-w-2xl p-8"
                 whileHover={{ filter: 'drop-shadow(0 0 20px rgba(255,255,255,0.9))', scale: 1.05 }}
               >
                 {slidesData[currentSlide]}
