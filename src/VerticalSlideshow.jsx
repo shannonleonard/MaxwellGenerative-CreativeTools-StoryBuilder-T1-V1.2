@@ -125,7 +125,7 @@ function GifPanelFixed({ pickerCollection, onSelectGif }) {
 // -----------------------------------------------------
 // Main VerticalSlideshow Component
 // -----------------------------------------------------
-const VerticalSlideshow = () => {
+const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
   // Slide text data.
   const slidesData = [
     "When critics dismiss AI as overhyped, innovation quietly unfolds.",
@@ -145,7 +145,6 @@ const VerticalSlideshow = () => {
     "Discover more insights and strategies at Creative Workflow Lab."
   ];
   
-  const [currentSlide, setCurrentSlide] = useState(0);
   const totalSlides = slidesData.length;
   
   // Global size state: affects uploaded image and all dropped GIFs.
@@ -192,52 +191,56 @@ const VerticalSlideshow = () => {
     });
   }, [currentSlide, textControls]);
   
-  // Keydown effect: When "e" is pressed, trigger an intense glow that fades over 5 seconds.
-  const glowTimeoutRef = useRef(null);
+  // Add this near the top with other constants
+  const glowColors = [
+    "rgba(255,0,255,0.8)", // Pink
+    "rgba(0,255,255,0.8)", // Cyan
+    "rgba(255,255,0,0.8)", // Yellow
+    "rgba(0,255,0,0.8)",   // Green
+    "rgba(255,128,0,0.8)"  // Orange
+  ];
+
+  // In the VerticalSlideshow component, update the keydown effect:
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key.toLowerCase() === "e") {
-        // Immediately trigger an intense glow effect.
-        textControls.start({
+        // Create a sequence of color transitions
+        const glowSequence = glowColors.map((color, index) => ({
           scale: 1.1,
-          filter: "drop-shadow(0 0 45px rgba(255,255,255,1))",
-          transition: { duration: 0.2 }
-        });
-        // Clear any previous timeout.
-        if (glowTimeoutRef.current) {
-          clearTimeout(glowTimeoutRef.current);
-        }
-        // Fade back to base state after 200ms, over 5 seconds.
-        glowTimeoutRef.current = setTimeout(() => {
-          textControls.start({
+          filter: `drop-shadow(0 0 45px ${color}) drop-shadow(0 0 85px ${color})`,
+          transition: { 
+            duration: 0.5,
+            delay: index * 0.2,
+            ease: "easeInOut"
+          }
+        }));
+
+        // Start the glow animation sequence
+        async function animateGlow() {
+          for (const glowState of glowSequence) {
+            await textControls.start(glowState);
+          }
+          // Return to default state
+          await textControls.start({
             scale: 1,
             filter: "drop-shadow(0 0 25px rgba(255,255,255,0.5))",
-            transition: { duration: 5, ease: "easeInOut" }
+            transition: { duration: 2, ease: "easeInOut" }
           });
-        }, 200);
+        }
+
+        animateGlow();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      if (glowTimeoutRef.current) {
-        clearTimeout(glowTimeoutRef.current);
-      }
     };
   }, [textControls]);
 
   // Slide navigation.
   const handleNext = () => setCurrentSlide((prev) => (prev + 1) % totalSlides);
   const handlePrevious = () => setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
-  useEffect(() => {
-    const handleArrowKeys = (e) => {
-      if (e.key === 'ArrowRight') handleNext();
-      else if (e.key === 'ArrowLeft') handlePrevious();
-    };
-    window.addEventListener('keydown', handleArrowKeys);
-    return () => window.removeEventListener('keydown', handleArrowKeys);
-  }, [totalSlides]);
 
   // Image upload handlers.
   const handleImageUpload = (e) => {
