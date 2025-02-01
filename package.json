@@ -1,8 +1,8 @@
 {
-  "name": "vertical-slideshow",
+  "name": "maxwellgenerative-creativetools-storybuilder-t1",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://shannonleonard.github.io/maxwell-shorty",
+  "homepage": "https://shannonleonard.github.io/MaxwellGenerative-CreativeTools-StoryBuilder-T1-V1.0",
   "dependencies": {
     "autoprefixer": "^10.4.12",
     "framer-motion": "^10.12.16",

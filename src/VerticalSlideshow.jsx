@@ -129,7 +129,7 @@ const VerticalSlideshow = () => {
   // Slide text data.
   const slidesData = [
     "When critics dismiss AI as overhyped, innovation quietly unfolds.",
-    "DeepSeek’s R1 emerges from a legacy of breakthroughs, challenging old assumptions.",
+    "DeepSeek's R1 emerges from a legacy of breakthroughs, challenging old assumptions.",
     "Accessibility in AI is growing—powerful reasoning tools become available for all.",
     "Rather than a threat, this evolution paves the way for smarter, more sustainable systems.",
     "Building on decades of progress, new models enhance efficiency and reduce environmental costs.",
@@ -137,7 +137,7 @@ const VerticalSlideshow = () => {
     "As large companies adapt, the ripple effect of accessible AI reshapes creative industries.",
     "Innovation now means combining cutting-edge tech with sustainable practices.",
     "The future is collaborative, where technology empowers creativity and inclusivity.",
-    "Every breakthrough refines our tools and redefines what’s possible.",
+    "Every breakthrough refines our tools and redefines what's possible.",
     "In this new era, smarter models fuel a more efficient and eco-conscious AI evolution.",
     "Creativity and technology merge to create powerful tools for the modern world.",
     "The shift is clear: accessible AI opens new avenues for creative problem solving.",
@@ -194,10 +194,14 @@ const VerticalSlideshow = () => {
   const resetTextPosition = useCallback(() => {
     baseX.set(0);
     baseY.set(0);
-  }, [baseX, baseY]);
+    springX.set(0);
+    springY.set(0);
+  }, [baseX, baseY, springX, springY]);
   useEffect(() => {
     const handleResetKey = (e) => {
-      if (e.key === "\\") resetTextPosition();
+      if (e.key === "\\" || e.key === "Backslash") {
+        resetTextPosition();
+      }
     };
     window.addEventListener('keydown', handleResetKey);
     return () => window.removeEventListener('keydown', handleResetKey);
@@ -381,26 +385,25 @@ const VerticalSlideshow = () => {
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentSlide}
-                initial={{ opacity: 0, y: 130, scale: 0.95, filter: "drop-shadow(0 0 0px rgba(255,255,255,0))" }}
+                initial={{ opacity: 0, y: 130, scale: 0.95 }}
                 animate={{
                   opacity: 1,
                   y: 0,
                   scale: 1,
-                  filter: [
-                    "drop-shadow(0 0 0px rgba(255,255,255,0))",
-                    "drop-shadow(0 0 25px rgba(255,255,255,1))",
-                    "drop-shadow(0 0 0px rgba(255,255,255,0))"
-                  ]
+                  filter: "drop-shadow(0 0 25px rgba(255,255,255,0.5))"
                 }}
                 exit={{ opacity: 0, y: -30, scale: 0.95 }}
                 transition={{
-                  opacity: { duration: 0.2, ease: "backInOut" },
-                  y: { duration: 0.2, ease: "backInOut" },
-                  scale: { duration: 0.2, ease: "backInOut" },
-                  filter: { duration: 0.6, times: [0, 0.3, 1], ease: "easeInOut" }
+                  opacity: { duration: 0.6, ease: "easeInOut" },
+                  y: { duration: 0.6, ease: "easeInOut" },
+                  scale: { duration: 0.6, ease: "easeInOut" }
+                }}
+                whileHover={{
+                  scale: 1.05,
+                  filter: "drop-shadow(0 0 35px rgba(255,255,255,0.8))",
+                  transition: { duration: 0.4, ease: "easeInOut" }
                 }}
                 className="text-white font-bold text-4xl leading-relaxed text-left max-w-xl p-8"
-                whileHover={{ filter: 'drop-shadow(0 0 20px rgba(255,255,255,0.9))', scale: 1.05 }}
               >
                 {slidesData[currentSlide]}
               </motion.div>
