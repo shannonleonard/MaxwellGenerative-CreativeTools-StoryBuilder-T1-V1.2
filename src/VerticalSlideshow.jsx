@@ -306,6 +306,34 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
   const x = useSpring(springX, { stiffness: 300, damping: 30 });
   const y = useSpring(springY, { stiffness: 300, damping: 30 });
 
+  // In the VerticalSlideshow component, add these for text movement
+  const moveStep = 20; // Pixels to move per keypress
+
+  // Add this effect for WASD movement
+  useEffect(() => {
+    const handleWASDPress = (e) => {
+      switch(e.key.toLowerCase()) {
+        case 'w':
+          springY.set(springY.get() - moveStep);
+          break;
+        case 's':
+          springY.set(springY.get() + moveStep);
+          break;
+        case 'a':
+          springX.set(springX.get() - moveStep);
+          break;
+        case 'd':
+          springX.set(springX.get() + moveStep);
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleWASDPress);
+    return () => window.removeEventListener('keydown', handleWASDPress);
+  }, [springX, springY]);
+
   return (
     <div className="w-full flex flex-col items-center relative overflow-hidden">
       {/* Control Dock */}
@@ -387,7 +415,11 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
             dragConstraints={containerRef}
             dragElastic={0.3}
             dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
-            style={{ x, y }}
+            style={{ 
+              x: springX,
+              y: springY,
+              transition: { type: 'spring', stiffness: 300, damping: 30 }
+            }}
             whileTap={{ cursor: 'grabbing' }}
             className="cursor-grab"
           >

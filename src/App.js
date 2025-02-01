@@ -3,7 +3,7 @@ import VerticalSlideshow from './VerticalSlideshow';
 
 function App() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const totalSlides = 15; // Match the number of slides in VerticalSlideshow
+  const totalSlides = 15;
 
   const handleNext = () => setCurrentSlide((prev) => (prev + 1) % totalSlides);
   const handlePrevious = () => setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
@@ -12,13 +12,9 @@ function App() {
     const handleKeyPress = (e) => {
       switch(e.key.toLowerCase()) {
         case 'arrowright':
-        case 'd':
-        case 'w':
           handleNext();
           break;
         case 'arrowleft':
-        case 'a':
-        case 's':
           handlePrevious();
           break;
         default:
@@ -31,7 +27,7 @@ function App() {
   }, []);
 
   return (
-    <div className="App min-h-screen bg-gray-900" basename="/MaxwellGenerative-CreativeTools-StoryBuilder-T1-V1.0">
+    <div className="App min-h-screen bg-gray-900">
       <VerticalSlideshow currentSlide={currentSlide} setCurrentSlide={setCurrentSlide} />
     </div>
   );
