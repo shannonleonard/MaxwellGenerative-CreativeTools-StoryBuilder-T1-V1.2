@@ -191,29 +191,69 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
     });
   }, [currentSlide, textControls]);
   
-  // First, update the movement settings for smoother motion
-  const movementSpeed = 0.2; // Reduced for smoother movement
-  const springConfig = { 
-    stiffness: 35,    // Reduced for looser movement
-    damping: 20,      // Adjusted for smoother motion
-    mass: 2,          // Increased mass for more inertia
-    restDelta: 0.001  // Fine-tuned rest position
-  };
-
-  // Update the text movement logic
+  // Draggable slide text.
   const baseX = useMotionValue(0);
   const baseY = useMotionValue(0);
-  const springX = useSpring(baseX, springConfig);
-  const springY = useSpring(baseY, springConfig);
+  const springX = useSpring(baseX, { stiffness: 300, damping: 20 });
+  const springY = useSpring(baseY, { stiffness: 300, damping: 20 });
 
-  // Update the glow effect to prevent cropping
-  const glowColors = [
-    "rgba(255,0,255,1)", // Bright Pink
-    "rgba(0,255,255,1)", // Bright Cyan
-    "rgba(255,255,0,1)", // Bright Yellow
-    "rgba(0,255,0,1)",   // Bright Green
-    "rgba(255,128,0,1)"  // Bright Orange
-  ];
+  // Reset functionality
+  const resetTextPosition = useCallback(() => {
+    baseX.set(0);
+    baseY.set(0);
+  }, [baseX, baseY]);
+
+  // WASD movement with RAF
+  const keysPressed = useRef({ w: false, a: false, s: false, d: false });
+  const lastTimeRef = useRef(null);
+  const rafId = useRef(null);
+  const movementSpeed = 0.5;
+
+  // Update the text movement logic
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const key = e.key.toLowerCase();
+      if (["w", "a", "s", "d"].includes(key)) keysPressed.current[key] = true;
+    };
+
+    const handleKeyUp = (e) => {
+      const key = e.key.toLowerCase();
+      if (["w", "a", "s", "d"].includes(key)) keysPressed.current[key] = false;
+    };
+
+    function animate(time) {
+      if (!lastTimeRef.current) lastTimeRef.current = time;
+      const delta = time - lastTimeRef.current;
+      lastTimeRef.current = time;
+      const movement = movementSpeed * delta;
+
+      if (keysPressed.current.w) baseY.set(baseY.get() - movement);
+      if (keysPressed.current.s) baseY.set(baseY.get() + movement);
+      if (keysPressed.current.a) baseX.set(baseX.get() - movement);
+      if (keysPressed.current.d) baseX.set(baseX.get() + movement);
+
+      rafId.current = requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    rafId.current = requestAnimationFrame(animate);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+    };
+  }, [baseX, baseY, movementSpeed]);
+
+  // Add this effect for the backslash key reset
+  useEffect(() => {
+    const handleResetKey = (e) => {
+      if (e.key === "\\") resetTextPosition();
+    };
+    window.addEventListener('keydown', handleResetKey);
+    return () => window.removeEventListener('keydown', handleResetKey);
+  }, [resetTextPosition]);
 
   // Slide navigation.
   const handleNext = () => setCurrentSlide((prev) => (prev + 1) % totalSlides);
@@ -270,63 +310,6 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
   const handleRemoveAllGifs = () => {
     setDroppedGifs([]);
   };
-
-  // Move these refs outside the useEffect, near other state declarations
-  const lastTimeRef = useRef(null);
-  const rafId = useRef(null);
-  const keysPressed = useRef({ w: false, a: false, s: false, d: false });
-
-  // Then update the useEffect
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      const key = e.key.toLowerCase();
-      if (["w", "a", "s", "d"].includes(key)) keysPressed.current[key] = true;
-    };
-
-    const handleKeyUp = (e) => {
-      const key = e.key.toLowerCase();
-      if (["w", "a", "s", "d"].includes(key)) keysPressed.current[key] = false;
-    };
-
-    function animate(time) {
-      if (!lastTimeRef.current) lastTimeRef.current = time;
-      const delta = time - lastTimeRef.current;
-      lastTimeRef.current = time;
-      const movement = movementSpeed * delta;
-
-      if (keysPressed.current.w) baseY.set(baseY.get() - movement);
-      if (keysPressed.current.s) baseY.set(baseY.get() + movement);
-      if (keysPressed.current.a) baseX.set(baseX.get() - movement);
-      if (keysPressed.current.d) baseX.set(baseX.get() + movement);
-
-      rafId.current = requestAnimationFrame(animate);
-    }
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-    rafId.current = requestAnimationFrame(animate);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-      if (rafId.current) cancelAnimationFrame(rafId.current);
-    };
-  }, [baseX, baseY, movementSpeed]);
-
-  // Add this near other state/ref declarations
-  const resetTextPosition = useCallback(() => {
-    baseX.set(0);
-    baseY.set(0);
-  }, [baseX, baseY]);
-
-  // Add this effect for the backslash key reset
-  useEffect(() => {
-    const handleResetKey = (e) => {
-      if (e.key === "\\") resetTextPosition();
-    };
-    window.addEventListener('keydown', handleResetKey);
-    return () => window.removeEventListener('keydown', handleResetKey);
-  }, [resetTextPosition]);
 
   return (
     <div className="w-full flex flex-col items-center relative overflow-hidden">
@@ -424,30 +407,26 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentSlide}
-                initial={{ opacity: 0, y: 130, scale: 0.95 }}
+                initial={{ opacity: 0, y: 130, scale: 0.95, filter: "drop-shadow(0 0 0px rgba(255,255,255,0))" }}
                 animate={{
                   opacity: 1,
                   y: 0,
                   scale: 1,
-                  filter: `
-                    drop-shadow(0 0 50px rgba(255,100,255,0.5))
-                    drop-shadow(0 0 100px rgba(100,200,255,0.3))
-                    drop-shadow(0 0 150px rgba(255,200,100,0.4))
-                  `
+                  filter: [
+                    "drop-shadow(0 0 0px rgba(255,255,255,0))",
+                    "drop-shadow(0 0 25px rgba(255,255,255,1))",
+                    "drop-shadow(0 0 0px rgba(255,255,255,0))"
+                  ]
                 }}
                 exit={{ opacity: 0, y: -30, scale: 0.95 }}
                 transition={{
-                  opacity: { duration: 0.8, ease: "easeInOut" },
-                  y: { duration: 0.8, ease: "easeInOut" },
-                  scale: { duration: 0.8, ease: "easeInOut" }
+                  opacity: { duration: 0.2, ease: "backInOut" },
+                  y: { duration: 0.2, ease: "backInOut" },
+                  scale: { duration: 0.2, ease: "backInOut" },
+                  filter: { duration: 0.6, times: [0, 0.3, 1], ease: "easeInOut" }
                 }}
-                className="text-white font-bold text-4xl leading-relaxed text-left max-w-3xl overflow-visible p-16"
-                style={{ 
-                  margin: "3rem",
-                  width: "min(800px, 90vw)",  // Wider but responsive
-                  lineHeight: "1.8",          // Better line spacing
-                  letterSpacing: "0.02em"     // Slightly better letter spacing
-                }}
+                className="text-white font-bold text-4xl leading-relaxed text-left max-w-xl p-8"
+                whileHover={{ filter: 'drop-shadow(0 0 20px rgba(255,255,255,0.9))', scale: 1.05 }}
               >
                 {slidesData[currentSlide]}
               </motion.div>
