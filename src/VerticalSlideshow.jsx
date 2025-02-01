@@ -429,16 +429,25 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
                   opacity: 1,
                   y: 0,
                   scale: 1,
-                  filter: "drop-shadow(0 0 50px rgba(255,255,255,0.5)) drop-shadow(0 0 100px rgba(255,255,255,0.3))"
+                  filter: `
+                    drop-shadow(0 0 50px rgba(255,100,255,0.5))
+                    drop-shadow(0 0 100px rgba(100,200,255,0.3))
+                    drop-shadow(0 0 150px rgba(255,200,100,0.4))
+                  `
                 }}
                 exit={{ opacity: 0, y: -30, scale: 0.95 }}
                 transition={{
-                  opacity: { duration: 0.6, ease: "easeInOut" },
-                  y: { duration: 0.6, ease: "easeInOut" },
-                  scale: { duration: 0.6, ease: "easeInOut" }
+                  opacity: { duration: 0.8, ease: "easeInOut" },
+                  y: { duration: 0.8, ease: "easeInOut" },
+                  scale: { duration: 0.8, ease: "easeInOut" }
                 }}
-                className="text-white font-bold text-4xl leading-relaxed text-left max-w-xl overflow-visible p-12"
-                style={{ margin: "2rem" }} // Added margin
+                className="text-white font-bold text-4xl leading-relaxed text-left max-w-3xl overflow-visible p-16"
+                style={{ 
+                  margin: "3rem",
+                  width: "min(800px, 90vw)",  // Wider but responsive
+                  lineHeight: "1.8",          // Better line spacing
+                  letterSpacing: "0.02em"     // Slightly better letter spacing
+                }}
               >
                 {slidesData[currentSlide]}
               </motion.div>
