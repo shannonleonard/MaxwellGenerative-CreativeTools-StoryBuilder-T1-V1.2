@@ -192,14 +192,14 @@ const VerticalSlideshow = () => {
     });
   }, [currentSlide, textControls]);
   
-  // Listen for key press "3" to trigger the glow effect.
+  // Listen for key press "e" to trigger the intense glow effect.
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === "3") {
-        // Immediately trigger a stronger glow and slight scale up
+      if (e.key.toLowerCase() === "e") {
+        // Immediately trigger a more intense glow and scale up
         textControls.start({
-          scale: 1.05,
-          filter: "drop-shadow(0 0 35px rgba(255,255,255,0.8))",
+          scale: 1.1,
+          filter: "drop-shadow(0 0 45px rgba(255,255,255,1))",
           transition: { duration: 0 }
         }).then(() => {
           // Then fade back to the base state smoothly over 5 seconds.
