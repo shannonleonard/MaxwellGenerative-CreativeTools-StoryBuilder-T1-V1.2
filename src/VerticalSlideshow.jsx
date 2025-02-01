@@ -192,24 +192,24 @@ const VerticalSlideshow = () => {
     });
   }, [currentSlide, textControls]);
   
-  // Trigger the intense glow effect when you press "e"
+  // Keydown effect: When "e" is pressed trigger intense glow, then fade back over 5 seconds.
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key.toLowerCase() === "e") {
-        // Immediately set the text to an intense glow with a slight scale up.
+        // Immediately trigger the intense glow effect.
         textControls.start({
           scale: 1.1,
           filter: "drop-shadow(0 0 45px rgba(255,255,255,1))",
           transition: { duration: 0.2 }
         });
-        // After a short delay, fade the text back to its normal state over 5 seconds.
+        // After a short delay, fade back to the base state over 5 seconds.
         setTimeout(() => {
           textControls.start({
             scale: 1,
             filter: "drop-shadow(0 0 25px rgba(255,255,255,0.5))",
             transition: { duration: 5, ease: "easeInOut" }
           });
-        }, 200); // Wait 200ms before starting the fade-out
+        }, 200);
       }
     };
 
