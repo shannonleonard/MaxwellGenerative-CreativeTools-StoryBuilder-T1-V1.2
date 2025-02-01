@@ -255,20 +255,20 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
     return () => window.removeEventListener('keydown', handleResetKey);
   }, [resetTextPosition]);
 
-  // Add this effect for the 'E' key glow
+  // Update just the E key glow effect
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key.toLowerCase() === 'e') {
         textControls.start({
           filter: [
+            "drop-shadow(0 0 0px rgba(255,255,255,0))",
             "drop-shadow(0 0 25px rgba(255,255,255,1))",
-            "drop-shadow(0 0 50px rgba(255,255,255,1))",
-            "drop-shadow(0 0 25px rgba(255,255,255,1))"
+            "drop-shadow(0 0 0px rgba(255,255,255,0))"
           ],
           transition: {
-            duration: 1,
-            ease: "easeInOut",
-            times: [0, 0.5, 1]
+            duration: 0.6,
+            times: [0, 0.3, 1],
+            ease: "easeInOut"
           }
         });
       }
