@@ -10,16 +10,8 @@ function App() {
 
   useEffect(() => {
     const handleKeyPress = (e) => {
-      switch(e.key.toLowerCase()) {
-        case 'arrowright':
-          handleNext();
-          break;
-        case 'arrowleft':
-          handlePrevious();
-          break;
-        default:
-          break;
-      }
+      if (e.key === 'ArrowRight') handleNext();
+      else if (e.key === 'ArrowLeft') handlePrevious();
     };
 
     window.addEventListener('keydown', handleKeyPress);
