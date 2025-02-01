@@ -191,7 +191,17 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
     });
   }, [currentSlide, textControls]);
   
-  // Update the glowColors array with more intense colors
+  // Near the top with other state declarations, update the movement settings
+  const movementSpeed = 0.5; // Controls WASD movement speed
+  const springConfig = { stiffness: 100, damping: 30 }; // More gentle spring for smoother movement
+
+  // Update the text movement logic
+  const baseX = useMotionValue(0);
+  const baseY = useMotionValue(0);
+  const springX = useSpring(baseX, springConfig);
+  const springY = useSpring(baseY, springConfig);
+
+  // Update the glow effect to prevent cropping
   const glowColors = [
     "rgba(255,0,255,1)", // Bright Pink
     "rgba(0,255,255,1)", // Bright Cyan
@@ -199,48 +209,6 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
     "rgba(0,255,0,1)",   // Bright Green
     "rgba(255,128,0,1)"  // Bright Orange
   ];
-
-  // Update the glow effect in the useEffect
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key.toLowerCase() === "e") {
-        // Create a sequence of color transitions with more intense glow
-        const glowSequence = glowColors.map((color, index) => ({
-          scale: 1.2,
-          filter: `
-            drop-shadow(0 0 50px ${color}) 
-            drop-shadow(0 0 100px ${color}) 
-            drop-shadow(0 0 150px ${color})
-          `,
-          transition: { 
-            duration: 0.3,
-            delay: index * 0.15,
-            ease: "easeInOut"
-          }
-        }));
-
-        // Start the glow animation sequence
-        async function animateGlow() {
-          for (const glowState of glowSequence) {
-            await textControls.start(glowState);
-          }
-          // Return to default state with a subtle glow
-          await textControls.start({
-            scale: 1,
-            filter: "drop-shadow(0 0 35px rgba(255,255,255,0.7))",
-            transition: { duration: 1.5, ease: "easeInOut" }
-          });
-        }
-
-        animateGlow();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [textControls]);
 
   // Slide navigation.
   const handleNext = () => setCurrentSlide((prev) => (prev + 1) % totalSlides);
@@ -298,41 +266,46 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
     setDroppedGifs([]);
   };
 
-  // Add these lines for spring motion
-  const springX = useMotionValue(0);
-  const springY = useMotionValue(0);
-  
-  // Or if you want smoother motion, use springs:
-  const x = useSpring(springX, { stiffness: 300, damping: 30 });
-  const y = useSpring(springY, { stiffness: 300, damping: 30 });
-
-  // In the VerticalSlideshow component, add these for text movement
-  const moveStep = 20; // Pixels to move per keypress
-
-  // Add this effect for WASD movement
+  // Add this effect right after the glowColors array
   useEffect(() => {
-    const handleWASDPress = (e) => {
-      switch(e.key.toLowerCase()) {
-        case 'w':
-          springY.set(springY.get() - moveStep);
-          break;
-        case 's':
-          springY.set(springY.get() + moveStep);
-          break;
-        case 'a':
-          springX.set(springX.get() - moveStep);
-          break;
-        case 'd':
-          springX.set(springX.get() + moveStep);
-          break;
-        default:
-          break;
-      }
+    const lastTimeRef = useRef(null);
+    const rafId = useRef(null);
+    const keysPressed = useRef({ w: false, a: false, s: false, d: false });
+
+    const handleKeyDown = (e) => {
+      const key = e.key.toLowerCase();
+      if (["w", "a", "s", "d"].includes(key)) keysPressed.current[key] = true;
     };
 
-    window.addEventListener('keydown', handleWASDPress);
-    return () => window.removeEventListener('keydown', handleWASDPress);
-  }, [springX, springY]);
+    const handleKeyUp = (e) => {
+      const key = e.key.toLowerCase();
+      if (["w", "a", "s", "d"].includes(key)) keysPressed.current[key] = false;
+    };
+
+    function animate(time) {
+      if (!lastTimeRef.current) lastTimeRef.current = time;
+      const delta = time - lastTimeRef.current;
+      lastTimeRef.current = time;
+      const movement = movementSpeed * delta;
+
+      if (keysPressed.current.w) baseY.set(baseY.get() - movement);
+      if (keysPressed.current.s) baseY.set(baseY.get() + movement);
+      if (keysPressed.current.a) baseX.set(baseX.get() - movement);
+      if (keysPressed.current.d) baseX.set(baseX.get() + movement);
+
+      rafId.current = requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    rafId.current = requestAnimationFrame(animate);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+    };
+  }, [baseX, baseY, movementSpeed]);
 
   return (
     <div className="w-full flex flex-col items-center relative overflow-hidden">
@@ -415,31 +388,44 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
             dragConstraints={containerRef}
             dragElastic={0.3}
             dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
-            style={{ 
-              x: springX,
-              y: springY,
-              transition: { type: 'spring', stiffness: 300, damping: 30 }
-            }}
+            style={{ x: springX, y: springY }}
             whileTap={{ cursor: 'grabbing' }}
-            className="cursor-grab"
+            className="cursor-grab relative p-20" // Added padding to prevent glow cropping
           >
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentSlide}
-                initial={{
-                  opacity: 0,
-                  y: 130,
-                  scale: 0.95,
-                  filter: "drop-shadow(0 0 25px rgba(255,255,255,0.5))"
+                initial={{ 
+                  opacity: 0, 
+                  y: 130, 
+                  scale: 0.95 
                 }}
-                animate={textControls}
-                exit={{
-                  opacity: 0,
-                  y: -30,
-                  scale: 0.95,
-                  transition: { duration: 0.6, ease: "easeInOut" }
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                  filter: [
+                    "drop-shadow(0 0 50px rgba(255,255,255,0))",
+                    "drop-shadow(0 0 100px rgba(255,255,255,1)) drop-shadow(0 0 150px rgba(255,255,255,1))",
+                    "drop-shadow(0 0 50px rgba(255,255,255,0))"
+                  ]
                 }}
-                className="text-white font-bold text-4xl leading-relaxed text-left max-w-xl p-8"
+                exit={{ 
+                  opacity: 0, 
+                  y: -30, 
+                  scale: 0.95 
+                }}
+                transition={{
+                  opacity: { duration: 0.3, ease: "easeInOut" },
+                  y: { duration: 0.3, ease: "easeInOut" },
+                  scale: { duration: 0.3, ease: "easeInOut" },
+                  filter: { duration: 1, times: [0, 0.5, 1], ease: "easeInOut" }
+                }}
+                className="text-white font-bold text-4xl leading-relaxed text-left max-w-xl"
+                whileHover={{ 
+                  filter: 'drop-shadow(0 0 50px rgba(255,255,255,0.9))', 
+                  scale: 1.05 
+                }}
               >
                 {slidesData[currentSlide]}
               </motion.div>
