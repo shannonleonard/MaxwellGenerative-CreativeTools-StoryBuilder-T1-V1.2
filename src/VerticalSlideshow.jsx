@@ -194,9 +194,10 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
   // First, update the movement settings for smoother motion
   const movementSpeed = 0.2; // Reduced for smoother movement
   const springConfig = { 
-    stiffness: 50,  // Reduced for more smoothness
-    damping: 15,    // Adjusted for better spring effect
-    mass: 1.5       // Added mass for more natural movement
+    stiffness: 35,    // Reduced for looser movement
+    damping: 20,      // Adjusted for smoother motion
+    mass: 2,          // Increased mass for more inertia
+    restDelta: 0.001  // Fine-tuned rest position
   };
 
   // Update the text movement logic
@@ -312,6 +313,21 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
     };
   }, [baseX, baseY, movementSpeed]);
 
+  // Add this near other state/ref declarations
+  const resetTextPosition = useCallback(() => {
+    baseX.set(0);
+    baseY.set(0);
+  }, [baseX, baseY]);
+
+  // Add this effect for the backslash key reset
+  useEffect(() => {
+    const handleResetKey = (e) => {
+      if (e.key === "\\") resetTextPosition();
+    };
+    window.addEventListener('keydown', handleResetKey);
+    return () => window.removeEventListener('keydown', handleResetKey);
+  }, [resetTextPosition]);
+
   return (
     <div className="w-full flex flex-col items-center relative overflow-hidden">
       {/* Control Dock */}
@@ -338,6 +354,9 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
           </button>
           <button onClick={handleRemoveAllGifs} className="p-2 bg-red-600 text-white rounded">
             Remove All GIFs
+          </button>
+          <button onClick={resetTextPosition} className="p-2 bg-blue-500 text-white rounded">
+            Reset Text Position ("\")
           </button>
         </div>
         {/* Background and Orb Speed Controls */}
@@ -410,20 +429,16 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
                   opacity: 1,
                   y: 0,
                   scale: 1,
-                  filter: [
-                    "drop-shadow(0 0 50px rgba(255,255,255,0))",
-                    "drop-shadow(0 0 100px rgba(255,255,255,1)) drop-shadow(0 0 150px rgba(255,255,255,1))",
-                    "drop-shadow(0 0 50px rgba(255,255,255,0))"
-                  ]
+                  filter: "drop-shadow(0 0 50px rgba(255,255,255,0.5)) drop-shadow(0 0 100px rgba(255,255,255,0.3))"
                 }}
                 exit={{ opacity: 0, y: -30, scale: 0.95 }}
                 transition={{
-                  opacity: { duration: 0.3, ease: "easeInOut" },
-                  y: { duration: 0.3, ease: "easeInOut" },
-                  scale: { duration: 0.3, ease: "easeInOut" },
-                  filter: { duration: 1, times: [0, 0.5, 1], ease: "easeInOut" }
+                  opacity: { duration: 0.6, ease: "easeInOut" },
+                  y: { duration: 0.6, ease: "easeInOut" },
+                  scale: { duration: 0.6, ease: "easeInOut" }
                 }}
-                className="text-white font-bold text-4xl leading-relaxed text-left max-w-xl overflow-visible" // Added overflow-visible
+                className="text-white font-bold text-4xl leading-relaxed text-left max-w-xl overflow-visible p-12"
+                style={{ margin: "2rem" }} // Added margin
               >
                 {slidesData[currentSlide]}
               </motion.div>
