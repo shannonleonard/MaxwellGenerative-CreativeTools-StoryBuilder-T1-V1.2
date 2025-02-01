@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring, useAnimation } from 'framer-motion';
 
 // -----------------------------------------------------
 // Orb and Background Helpers
@@ -174,6 +174,48 @@ const VerticalSlideshow = () => {
   const [selectedBackgroundTheme, setSelectedBackgroundTheme] = useState(backgroundThemes[0].value);
   const [orbSpeed, setOrbSpeed] = useState(1);
 
+  // Animation controls for the slide text
+  const textControls = useAnimation();
+  
+  // Animate to the base (default) state whenever the slide changes.
+  useEffect(() => {
+    textControls.start({
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      filter: "drop-shadow(0 0 25px rgba(255,255,255,0.5))",
+      transition: {
+        opacity: { duration: 0.6, ease: "easeInOut" },
+        y: { duration: 0.6, ease: "easeInOut" },
+        scale: { duration: 0.6, ease: "easeInOut" }
+      }
+    });
+  }, [currentSlide, textControls]);
+  
+  // Listen for key press "3" to trigger the glow effect.
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "3") {
+        // Immediately trigger a stronger glow and slight scale up
+        textControls.start({
+          scale: 1.05,
+          filter: "drop-shadow(0 0 35px rgba(255,255,255,0.8))",
+          transition: { duration: 0 }
+        }).then(() => {
+          // Then fade back to the base state smoothly over 5 seconds.
+          return textControls.start({
+            scale: 1,
+            filter: "drop-shadow(0 0 25px rgba(255,255,255,0.5))",
+            transition: { duration: 5, ease: "easeInOut" }
+          });
+        });
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [textControls]);
+
   // Slide navigation.
   const handleNext = () => setCurrentSlide((prev) => (prev + 1) % totalSlides);
   const handlePrevious = () => setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
@@ -185,62 +227,6 @@ const VerticalSlideshow = () => {
     window.addEventListener('keydown', handleArrowKeys);
     return () => window.removeEventListener('keydown', handleArrowKeys);
   }, [totalSlides]);
-
-  // Draggable slide text.
-  const baseX = useMotionValue(0);
-  const baseY = useMotionValue(0);
-  const springX = useSpring(baseX, { stiffness: 300, damping: 20 });
-  const springY = useSpring(baseY, { stiffness: 300, damping: 20 });
-  const resetTextPosition = useCallback(() => {
-    baseX.set(0);
-    baseY.set(0);
-    springX.set(0);
-    springY.set(0);
-  }, [baseX, baseY, springX, springY]);
-  useEffect(() => {
-    const handleResetKey = (e) => {
-      if (e.key === "\\" || e.key === "Backslash") {
-        resetTextPosition();
-      }
-    };
-    window.addEventListener('keydown', handleResetKey);
-    return () => window.removeEventListener('keydown', handleResetKey);
-  }, [resetTextPosition]);
-  const keysPressed = useRef({ w: false, a: false, s: false, d: false });
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      const key = e.key.toLowerCase();
-      if (["w", "a", "s", "d"].includes(key)) keysPressed.current[key] = true;
-    };
-    const handleKeyUp = (e) => {
-      const key = e.key.toLowerCase();
-      if (["w", "a", "s", "d"].includes(key)) keysPressed.current[key] = false;
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, []);
-  const lastTimeRef = useRef(null);
-  const rafId = useRef(null);
-  const movementSpeed = 0.5;
-  useEffect(() => {
-    function animate(time) {
-      if (!lastTimeRef.current) lastTimeRef.current = time;
-      const delta = time - lastTimeRef.current;
-      lastTimeRef.current = time;
-      const movement = movementSpeed * delta;
-      if (keysPressed.current.w) baseY.set(baseY.get() - movement);
-      if (keysPressed.current.s) baseY.set(baseY.get() + movement);
-      if (keysPressed.current.a) baseX.set(baseX.get() - movement);
-      if (keysPressed.current.d) baseX.set(baseX.get() + movement);
-      rafId.current = requestAnimationFrame(animate);
-    }
-    rafId.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafId.current);
-  }, [baseX, baseY]);
 
   // Image upload handlers.
   const handleImageUpload = (e) => {
@@ -318,9 +304,6 @@ const VerticalSlideshow = () => {
           <button onClick={handleNext} className="p-2 bg-gray-200 text-black rounded">
             Next
           </button>
-          <button onClick={resetTextPosition} className="p-2 bg-blue-500 text-white rounded">
-            Reset Text Position ("\\")
-          </button>
           <button onClick={handleRemoveAllGifs} className="p-2 bg-red-600 text-white rounded">
             Remove All GIFs
           </button>
@@ -385,23 +368,18 @@ const VerticalSlideshow = () => {
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentSlide}
-                initial={{ opacity: 0, y: 130, scale: 0.95 }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                  scale: 1,
+                initial={{
+                  opacity: 0,
+                  y: 130,
+                  scale: 0.95,
                   filter: "drop-shadow(0 0 25px rgba(255,255,255,0.5))"
                 }}
-                exit={{ opacity: 0, y: -30, scale: 0.95 }}
-                transition={{
-                  opacity: { duration: 0.6, ease: "easeInOut" },
-                  y: { duration: 0.6, ease: "easeInOut" },
-                  scale: { duration: 0.6, ease: "easeInOut" }
-                }}
-                whileHover={{
-                  scale: 1.05,
-                  filter: "drop-shadow(0 0 35px rgba(255,255,255,0.8))",
-                  transition: { duration: 0.4, ease: "easeInOut" }
+                animate={textControls}
+                exit={{
+                  opacity: 0,
+                  y: -30,
+                  scale: 0.95,
+                  transition: { duration: 0.6, ease: "easeInOut" }
                 }}
                 className="text-white font-bold text-4xl leading-relaxed text-left max-w-xl p-8"
               >
