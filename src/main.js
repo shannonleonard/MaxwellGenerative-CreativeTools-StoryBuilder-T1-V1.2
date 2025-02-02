@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
+import VerticalSlideshow from './VerticalSlideshow.jsx';
+
+const App = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  return <VerticalSlideshow currentSlide={currentSlide} setCurrentSlide={setCurrentSlide} />;
+};
 
 // Mount the App component into the "root" div in index.html
 ReactDOM.render(<App />, document.getElementById('root'));
