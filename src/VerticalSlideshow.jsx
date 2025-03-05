@@ -508,6 +508,8 @@ const VerticalSlideshow = ({ currentSlide, setCurrentSlide }) => {
   );
 };
 
+// Export for direct use in HTML
 window.VerticalSlideshow = VerticalSlideshow;
+export default VerticalSlideshow;
 
 

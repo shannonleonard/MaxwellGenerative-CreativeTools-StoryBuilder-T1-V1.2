@@ -2,13 +2,43 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Vertical Slideshow</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Story Builder Test</title>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        font-family: Arial, sans-serif;
+      }
+      .container {
+        background-color: #FF0000;
+        color: white;
+        height: 100vh;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+      h1 {
+        font-size: 32px;
+        margin-bottom: 20px;
+      }
+      p {
+        font-size: 18px;
+        max-width: 600px;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
-    <!-- In the production build, CRA automatically injects the JS bundle -->
-    <script src="/MaxwellGenerative-CreativeTools-StoryBuilder-T1-V1.2/static/js/main.[hash].js"></script>
+    <div class="container">
+      <h1>STATIC TEST PAGE</h1>
+      <p>This is a completely static HTML page with no JavaScript dependencies. If you can see this red background and text, the page is working correctly!</p>
+    </div>
   </body>
 </html>

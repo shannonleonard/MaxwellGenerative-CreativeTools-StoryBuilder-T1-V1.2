@@ -1,20 +1,21 @@
-import React from "react";
-
-console.log("App is rendering in production!");
+import React from 'react';
 
 function App() {
   return (
     <div style={{
-      height: "100vh",
-      width: "100vw",
-      backgroundColor: "#333",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
+      backgroundColor: 'red',
+      color: 'white',
+      height: '100vh',
+      width: '100vw',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      fontSize: '24px',
+      fontWeight: 'bold',
+      textAlign: 'center',
+      padding: '20px'
     }}>
-      <h1 style={{ color: "#fff", fontSize: "3rem" }}>
-        Debug: App is rendering!
-      </h1>
+      THIS IS A TEST PAGE WITH RED BACKGROUND - IF YOU CAN SEE THIS, REACT IS WORKING!
     </div>
   );
 }
