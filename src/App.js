@@ -1,4 +1,5 @@
 import React from "react";
+import './index.css'; // Import CSS for Tailwind styles
 
 console.log("App is rendering in production!");
 
